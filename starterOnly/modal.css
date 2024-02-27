@@ -44,7 +44,7 @@ img {
 }
 /*ajout clamp à la width du logo pour affichage tablette*/
 .header-logo img{
-  width: clamp(10rem, 15vw, 277px)
+  width: clamp(160px, 20vw, 277px)
 }
 .main-navbar {
     float: right;
@@ -481,7 +481,7 @@ input[data-error]::after {
 }
  /*modifier taille police et margin top*/
 .hero-headline {
-  font-size: clamp(2.5rem, 1.0877rem + 5.4581vw, 6rem);
+  font-size: clamp(2.5rem, 7.5vw, 6rem);
   font-weight: 500;
   white-space: nowrap;
 }
