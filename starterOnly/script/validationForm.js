@@ -5,10 +5,9 @@ let email = document.getElementById("email");
 let date = document.getElementById("birthdate");
 let quantity = document.getElementById("quantity");
 let locations = document.querySelectorAll('input[type="radio"]');
-console.log(locations)
 let checkbox1 = document.getElementById("checkbox1");
 
-function afficherMessageErreur(champ, message) {
+function errorMessage(champ, message) {
   let formData = champ.closest(".formData");
   if (formData) {
     formData.setAttribute("data-error", message);
@@ -24,12 +23,14 @@ function afficherMessageErreur(champ, message) {
 function firstNameValid(firstName) {
   let value = firstName.value.trim();
   if (value.length < 2) {
-    afficherMessageErreur(
+    errorMessage(
       firstName,
       "Le prénom doit avoir au moins deux caractères"
     );
+    return false
   } else {
-    afficherMessageErreur(firstName, "");
+    errorMessage(firstName, "");
+    return true
   }
 }
 firstName.addEventListener("input", () => {
@@ -39,12 +40,11 @@ firstName.addEventListener("input", () => {
 function lastNameValid(lastName) {
   let value = lastName.value.trim();
   if (value.length < 2) {
-    afficherMessageErreur(
-      lastName,
-      "Le nom doit avoir au moins deux caractères"
-    );
+    errorMessage(lastName, "Le nom doit avoir au moins deux caractères");
+    return false;
   } else {
-    afficherMessageErreur(lastName, "");
+    errorMessage(lastName, "");
+    return true;
   }
 }
 lastName.addEventListener("input", () => {
@@ -54,9 +54,11 @@ lastName.addEventListener("input", () => {
 function emailValid(email) {
   if (!email.checkValidity() || email.value === "") {
     //utiliser checkValidity fonction intégrée pour valider l'email
-    afficherMessageErreur(email, "EMAIL NON VALID");
+    errorMessage(email, "EMAIL NON VALID");
+    return false;
   } else {
-    afficherMessageErreur(email, "");
+    errorMessage(email, "");
+    return true;
   }
 }
 email.addEventListener("input", () => {
@@ -68,10 +70,12 @@ function validateBirthday(date) { //si on ne veut pas vérifier l'âge ( on mets
     let dateNow = new Date() //obtenir la date actuelle
     let difference = dateNow - dateValue
     let age = Math.floor(difference / (1000 * 60 *60 *24 *365)) //calculer la différence d'age en arrondissant le résultat à l'entier inférieur
-    if (!date.value || age < 12) {
-        afficherMessageErreur(date, "Ce champ doit être saisi, Vous devez avoir au moins 12 ans pour participer");
-    }else{
-        afficherMessageErreur(date, "");
+    if (!date.value || age < 0) {
+        errorMessage(date, "Ce champ doit être saisi, Vous devez avoir au moins 12 ans pour participer");
+      return false;
+      }else{
+        errorMessage(date, "");
+        return true
     }
 }
 date.addEventListener("change", () => {
@@ -80,9 +84,11 @@ date.addEventListener("change", () => {
 // vérifier si la valeur du nombre de concours doit être numérique
 function quantityValid(quantity) {
   if (quantity.value.trim() === "") {
-    afficherMessageErreur(quantity, "Veuiller entrer un chiffre");
+    errorMessage(quantity, "Veuiller entrer un chiffre");
+    return false
   } else {
-    afficherMessageErreur(quantity, "");
+    errorMessage(quantity, "");
+    return true;
   }
 }
 quantity.addEventListener("input", () => {
@@ -102,10 +108,12 @@ function validateRadio(locations){
     }
     // Afficher un message d'erreur si aucun bouton radio n'est sélectionné
     if (!radioChecked) {
-        afficherMessageErreur(locations[0], "Veuillez choisir une option");
+        errorMessage(locations[0], "Veuillez choisir une option");
+        return false;
     } else {
-        afficherMessageErreur(locations[0], ""); // Effacer le message d'erreur s'il y en a un
-    }
+        errorMessage(locations[0], ""); // Effacer le message d'erreur s'il y en a un
+    return true
+      }
 }
 locations.forEach(function(location) {
     location.addEventListener("change", function() {
@@ -116,33 +124,44 @@ locations.forEach(function(location) {
 // Validation des conditions générales
 function validateGenralCondition(checkbox1){
     if (!checkbox1.checked){
-        afficherMessageErreur(checkbox1, "Veuiller accepter les conditions générales")
+        errorMessage(checkbox1, "Veuiller accepter les conditions générales")
+        return false
     } else {
-        afficherMessageErreur(checkbox1, "")
+        errorMessage(checkbox1, "")
+        return true
     }
 }
 checkbox1.addEventListener("change", function(){
     validateGenralCondition(checkbox1)
 })
-
-// ajout page de confirmation
-function confirmationSubmit() {
-    
-}
-
 let form = document.querySelector("form");
+// ajout page de confirmation
+let modalBody = document.querySelector(".modal-body")
+let success = document.querySelector(".modal-confirmation")
+function closeModalForm() {
+ form.style.opacity = "0"
+ success.style.display = "flex"
+}
+function validationForm(){
+  let isValid = true
+  isValid &= firstNameValid(firstName);
+  isValid &= lastNameValid(lastName);
+  isValid &= emailValid(email);
+  isValid &= validateBirthday(date);
+  isValid &= quantityValid(quantity);
+  isValid &= validateRadio(locations);
+  isValid &= validateGenralCondition(checkbox1);
+  return isValid;
+}
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  try {
-    firstNameValid(firstName);
-    lastNameValid(lastName);
-    emailValid(email);
-    quantityValid(quantity);
-    validateBirthday(date);
-    validateRadio(locations);
-    validateGenralCondition(checkbox1)
-  } catch (erreur) {
-    console.log(erreur.message); // Afficher l'erreur dans la console
-    afficherMessageErreur(erreur.champ, erreur.message); // Afficher le message d'erreur sous le champ concerné
-  }
+  try{
+    if(validationForm()){
+        closeModalForm()
+    }
+} catch (erreur) {
+ // Afficher l'erreur dans la console
+    errorMessage(erreur.champ, erreur.message); // Afficher le message d'erreur sous le champ concerné
+  }; 
+  
 });
